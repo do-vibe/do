@@ -39,5 +39,5 @@ jobs:
       - name: Lint
         run: ruff check .
 
-      - name: Validate app imports
-        run: python -c "import main"
+      - name: Test
+        run: pytest
