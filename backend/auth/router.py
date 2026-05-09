@@ -113,4 +113,6 @@ async def get_me(access_token: Optional[str] = Cookie(default=None)):
 
 @router.post("/logout")
 async def logout():
-    return JSONResponse({"detail": "not implemented"}, status_code=501)
+    response = JSONResponse({"detail": "logged out"})
+    response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax")
+    return response
