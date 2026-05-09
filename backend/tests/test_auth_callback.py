@@ -1,4 +1,3 @@
-import pytest
 import httpx
 import respx
 
@@ -6,9 +5,8 @@ GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 
 
-@pytest.mark.skip(reason="not yet implemented")
 @respx.mock
-def test_happy_path_sets_cookie(client, mock_user):
+def test_happy_path_sets_cookie(client, mock_user, mock_supabase):
     respx.post(GOOGLE_TOKEN_URL).mock(
         return_value=httpx.Response(200, json={"access_token": "fake_token"})
     )
@@ -23,9 +21,8 @@ def test_happy_path_sets_cookie(client, mock_user):
     assert "access_token" in response.cookies
 
 
-@pytest.mark.skip(reason="not yet implemented")
 @respx.mock
-def test_happy_path_redirects_to_frontend(client, mock_user):
+def test_happy_path_redirects_to_frontend(client, mock_user, mock_supabase):
     respx.post(GOOGLE_TOKEN_URL).mock(
         return_value=httpx.Response(200, json={"access_token": "fake_token"})
     )
@@ -40,9 +37,8 @@ def test_happy_path_redirects_to_frontend(client, mock_user):
     assert response.status_code in (302, 307)
 
 
-@pytest.mark.skip(reason="not yet implemented")
 @respx.mock
-def test_cookie_is_httponly(client, mock_user):
+def test_cookie_is_httponly(client, mock_user, mock_supabase):
     respx.post(GOOGLE_TOKEN_URL).mock(
         return_value=httpx.Response(200, json={"access_token": "fake_token"})
     )
@@ -58,7 +54,6 @@ def test_cookie_is_httponly(client, mock_user):
     assert "httponly" in set_cookie.lower()
 
 
-@pytest.mark.skip(reason="not yet implemented")
 @respx.mock
 def test_google_token_exchange_failure(client):
     respx.post(GOOGLE_TOKEN_URL).mock(
@@ -68,7 +63,6 @@ def test_google_token_exchange_failure(client):
     assert response.status_code in (400, 401)
 
 
-@pytest.mark.skip(reason="not yet implemented")
 def test_missing_code_returns_422(client):
     response = client.get("/auth/callback")
     assert response.status_code == 422
