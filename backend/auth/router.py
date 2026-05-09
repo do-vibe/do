@@ -1,11 +1,12 @@
 import os
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Cookie, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
-from jose import jwt
+from jose import JWTError, jwt
 from supabase import Client, create_client
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -100,8 +101,14 @@ async def google_callback(code: str):
 
 
 @router.get("/me")
-async def get_me():
-    return JSONResponse({"detail": "not implemented"}, status_code=501)
+async def get_me(access_token: Optional[str] = Cookie(default=None)):
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(access_token, os.getenv("JWT_SECRET"), algorithms=[_JWT_ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return {"user_id": payload["user_id"], "email": payload["email"]}
 
 
 @router.post("/logout")
