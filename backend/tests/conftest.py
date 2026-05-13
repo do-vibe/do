@@ -5,9 +5,12 @@ os.environ.setdefault("GOOGLE_CLIENT_SECRET", "test-client-secret")
 os.environ.setdefault("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/callback")
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-key-for-testing-only")
 os.environ.setdefault("FRONTEND_URL", "http://localhost:3000")
+os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
+os.environ.setdefault("SUPABASE_SERVICE_KEY", "test-service-key")
 
 import pytest
 from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from jose import jwt
 
@@ -57,3 +60,13 @@ def expired_jwt_token(mock_user):
 def authenticated_client(client, valid_jwt_token):
     client.cookies.set("access_token", valid_jwt_token)
     return client
+
+
+@pytest.fixture
+def mock_supabase(mock_user):
+    mock_client = MagicMock()
+    mock_client.table.return_value.upsert.return_value.execute.return_value.data = [
+        {"id": mock_user["id"], "email": mock_user["email"], "name": mock_user["name"]}
+    ]
+    with patch("auth.router._get_supabase", return_value=mock_client):
+        yield mock_client
