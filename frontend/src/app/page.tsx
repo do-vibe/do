@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 function drawDroplets(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d");
@@ -97,14 +97,10 @@ function drawDroplets(canvas: HTMLCanvasElement) {
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const contentRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -117,7 +113,12 @@ export default function Home() {
     resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
-  }, [mounted]);
+  }, []);
+
+  useEffect(() => {
+    contentRef.current?.classList.add("visible");
+    footerRef.current?.classList.add("visible");
+  }, []);
 
   const handleSignIn = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
@@ -260,7 +261,7 @@ export default function Home() {
       <div className="sp-root">
         <canvas ref={canvasRef} className="sp-canvas" aria-hidden="true" />
 
-        <main className={`sp-content ${mounted ? "visible" : ""}`}>
+        <main ref={contentRef} className="sp-content">
           <h1 className="sp-title">
             <span className="dim">-[</span>:do:<span className="dim">]-</span>
           </h1>
@@ -278,7 +279,7 @@ export default function Home() {
           <p className="sp-tagline">a new way to get things done</p>
         </main>
 
-        <footer className={`sp-footer ${mounted ? "visible" : ""}`}>
+        <footer ref={footerRef} className="sp-footer">
           <span className="sp-footer-text">powered by claude</span>
         </footer>
       </div>
