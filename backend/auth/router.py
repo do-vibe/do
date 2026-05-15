@@ -69,6 +69,7 @@ async def google_callback(code: str):
             "google_id": userinfo["id"],
             "email": userinfo["email"],
             "name": userinfo["name"],
+            "avatar_url": userinfo.get("picture"),
         },
         on_conflict="google_id",
     ).execute()
@@ -89,11 +90,12 @@ async def google_callback(code: str):
         url=f"{os.getenv('FRONTEND_URL')}/dashboard",
         status_code=302,
     )
+    is_prod = os.getenv("ENVIRONMENT") == "production"
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=is_prod,
         samesite="lax",
         max_age=_JWT_EXPIRY_HOURS * 3600,
     )
