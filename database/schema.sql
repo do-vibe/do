@@ -1,6 +1,3 @@
-
-
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -30,7 +27,7 @@ SET default_table_access_method = "heap";
 CREATE TABLE IF NOT EXISTS "public"."atoms" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "system_id" "uuid",
-    "owner_id" "uuid",
+    "owner_id" "uuid" NOT NULL,
     "task" "text" NOT NULL,
     "due_date" "date",
     "recurring" boolean DEFAULT false,
@@ -52,7 +49,7 @@ ALTER TABLE "public"."atoms" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."goals" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "owner_id" "uuid",
+    "owner_id" "uuid" NOT NULL,
     "team_id" "uuid",
     "title" "text" NOT NULL,
     "purpose" "text",
@@ -92,6 +89,7 @@ ALTER TABLE "public"."retros" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."systems" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "owner_id" "uuid" NOT NULL,
     "goal_id" "uuid",
     "title" "text" NOT NULL,
     "description" "text",
@@ -131,7 +129,12 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "display_name" "text",
     "avatar_url" "text",
     "created_at" timestamp with time zone DEFAULT "now"(),
-    "calendar_token" "text" DEFAULT ("gen_random_uuid"())::"text" NOT NULL
+    "calendar_token" "text" DEFAULT ("gen_random_uuid"())::"text" NOT NULL,
+    "timezone" "text" DEFAULT 'UTC'::"text" NOT NULL,
+    "password_hash" "text",
+    "email_verified" boolean DEFAULT false NOT NULL,
+    "reset_token" "text",
+    "reset_token_expires_at" timestamp with time zone
 );
 
 
@@ -225,6 +228,11 @@ ALTER TABLE ONLY "public"."retro_items"
 
 ALTER TABLE ONLY "public"."retros"
     ADD CONSTRAINT "retros_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."systems"
+    ADD CONSTRAINT "systems_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -351,10 +359,3 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
